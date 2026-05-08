@@ -1,138 +1,207 @@
 package view;
 
-import util.Tema;
+import model.Usuario;
+import util.UsuarioDAO;
 
 import javax.swing.*;
 import java.awt.*;
 
-public class JCadastroUsuario extends JFrame {
+public class JCadastroUsuario extends JDialog {
 
     private JTextField txtUsuario;
-    private JPasswordField txtSenha;
+    private JTextField txtSenha;
     private JComboBox<String> cbTipo;
 
-    private String usuarioEdicao = null;
+    private UsuarioDAO dao = new UsuarioDAO();
 
-    // 🔥 REFERÊNCIA DA TELA
     private JUsuarios telaUsuarios;
 
-    // ===== CONSTRUTOR PADRÃO =====
-    public JCadastroUsuario() {
+    public JCadastroUsuario(JUsuarios telaUsuarios) {
+
+        this.telaUsuarios = telaUsuarios;
 
         setTitle("Cadastro de Usuário");
-        setSize(400, 300);
+
+        setSize(350, 280);
+
         setLocationRelativeTo(null);
+
+        setModal(true);
+
         setLayout(new BorderLayout());
 
-        add(Tema.header("Cadastro de Usuário"), BorderLayout.NORTH);
+        getContentPane().setBackground(
+                new Color(25,25,25)
+        );
 
-        JPanel form = new JPanel(new GridBagLayout());
-        form.setBackground(Tema.BG_PRINCIPAL);
+        // =====================================================
+        // TOPO
+        // =====================================================
 
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10,10,10,10);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
+        JPanel topo = new JPanel();
 
-        // Usuário
-        gbc.gridx = 0; gbc.gridy = 0;
-        form.add(label("Usuário"), gbc);
+        topo.setBackground(new Color(15,15,15));
 
-        gbc.gridx = 1;
-        txtUsuario = campo();
-        form.add(txtUsuario, gbc);
+        JLabel titulo =
+                new JLabel("Novo Usuário");
 
-        // Senha
-        gbc.gridx = 0; gbc.gridy++;
-        form.add(label("Senha"), gbc);
+        titulo.setForeground(Color.WHITE);
 
-        gbc.gridx = 1;
-        txtSenha = new JPasswordField(15);
-        txtSenha.setBackground(new Color(50,50,50));
-        txtSenha.setForeground(Color.WHITE);
-        txtSenha.setCaretColor(Color.WHITE);
-        form.add(txtSenha, gbc);
+        titulo.setFont(
+                new Font(
+                        "Segoe UI",
+                        Font.BOLD,
+                        20
+                )
+        );
 
-        // Tipo
-        gbc.gridx = 0; gbc.gridy++;
-        form.add(label("Tipo"), gbc);
+        topo.add(titulo);
 
-        gbc.gridx = 1;
-        cbTipo = new JComboBox<>(new String[]{"ADMIN", "USER"});
-        form.add(cbTipo, gbc);
+        add(topo, BorderLayout.NORTH);
 
-        // Botão
-        gbc.gridx = 0; gbc.gridy++;
-        gbc.gridwidth = 2;
+        // =====================================================
+        // FORM
+        // =====================================================
 
-        JButton btnSalvar = new JButton("Salvar");
-        btnSalvar.setBackground(new Color(70,130,180));
-        btnSalvar.setForeground(Color.WHITE);
-        btnSalvar.setFocusPainted(false);
-        btnSalvar.setFont(Tema.FONTE_BOLD);
+        JPanel form =
+                new JPanel(
+                        new GridLayout(6,1,5,5)
+                );
 
-        form.add(btnSalvar, gbc);
+        form.setBorder(
+                BorderFactory.createEmptyBorder(
+                        15,
+                        15,
+                        15,
+                        15
+                )
+        );
+
+        form.setBackground(
+                new Color(25,25,25)
+        );
+
+        JLabel l1 = new JLabel("Usuário");
+        l1.setForeground(Color.WHITE);
+
+        txtUsuario = new JTextField();
+
+        JLabel l2 = new JLabel("Senha");
+        l2.setForeground(Color.WHITE);
+
+        txtSenha = new JTextField();
+
+        JLabel l3 = new JLabel("Tipo");
+        l3.setForeground(Color.WHITE);
+
+        cbTipo =
+                new JComboBox<>(
+                        new String[]{
+                                "ADMIN",
+                                "USER"
+                        }
+                );
+
+        form.add(l1);
+        form.add(txtUsuario);
+
+        form.add(l2);
+        form.add(txtSenha);
+
+        form.add(l3);
+        form.add(cbTipo);
 
         add(form, BorderLayout.CENTER);
 
-        btnSalvar.addActionListener(e -> salvar());
-    }
+        // =====================================================
+        // BOTÕES
+        // =====================================================
 
-    // 🔥 CONSTRUTOR COM REFERÊNCIA (NOVO)
-    public JCadastroUsuario(JUsuarios telaUsuarios) {
-        this();
-        this.telaUsuarios = telaUsuarios;
-    }
+        JPanel botoes = new JPanel();
 
-    // ===== EDITAR =====
-    public JCadastroUsuario(String usuario, String tipo) {
-        this();
-        this.usuarioEdicao = usuario;
+        botoes.setBackground(
+                new Color(25,25,25)
+        );
 
-        txtUsuario.setText(usuario);
-        cbTipo.setSelectedItem(tipo);
-    }
+        JButton btnSalvar =
+                new JButton("Salvar");
 
-    // ===== SALVAR =====
-    private void salvar() {
+        JButton btnCancelar =
+                new JButton("Cancelar");
 
-        String usuario = txtUsuario.getText();
-        String senha = new String(txtSenha.getPassword());
-        String tipo = cbTipo.getSelectedItem().toString();
+        btnSalvar.setBackground(
+                new Color(0,120,215)
+        );
 
-        if (usuario.isEmpty() || senha.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Preencha todos os campos!");
-            return;
-        }
+        btnSalvar.setForeground(Color.WHITE);
 
-        if (usuarioEdicao == null) {
+        btnCancelar.setBackground(
+                new Color(180,30,30)
+        );
 
-            // 🔥 ATUALIZA A TABELA AUTOMATICAMENTE
-            if (telaUsuarios != null) {
-                telaUsuarios.adicionarUsuario(usuario, tipo);
+        btnCancelar.setForeground(Color.WHITE);
+
+        botoes.add(btnSalvar);
+        botoes.add(btnCancelar);
+
+        add(botoes, BorderLayout.SOUTH);
+
+        // =====================================================
+        // SALVAR
+        // =====================================================
+
+        btnSalvar.addActionListener(e -> {
+
+            String usuario =
+                    txtUsuario.getText();
+
+            String senha =
+                    txtSenha.getText();
+
+            String tipo =
+                    cbTipo.getSelectedItem()
+                            .toString();
+
+            if(usuario.isEmpty()
+                    || senha.isEmpty()){
+
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Preencha todos os campos!"
+                );
+
+                return;
             }
 
-            JOptionPane.showMessageDialog(this, "Usuário cadastrado!");
+            Usuario u = new Usuario();
 
-        } else {
-            JOptionPane.showMessageDialog(this, "Usuário atualizado!");
-        }
+            u.setUsuario(usuario);
 
-        dispose();
-    }
+            u.setSenha(senha);
 
-    private JLabel label(String txt) {
-        JLabel l = new JLabel(txt);
-        l.setForeground(Color.WHITE);
-        l.setFont(Tema.FONTE_BOLD);
-        return l;
-    }
+            u.setTipo(tipo);
 
-    private JTextField campo() {
-        JTextField t = new JTextField(15);
-        t.setBackground(new Color(50,50,50));
-        t.setForeground(Color.WHITE);
-        t.setCaretColor(Color.WHITE);
-        t.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
-        return t;
+            // SALVA NO BANCO
+            dao.salvar(u);
+
+            // RECARREGA TABELA
+            telaUsuarios.recarregarTabela();
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Usuário salvo com sucesso!"
+            );
+
+            dispose();
+        });
+
+        // =====================================================
+        // CANCELAR
+        // =====================================================
+
+        btnCancelar.addActionListener(e -> {
+
+            dispose();
+        });
     }
 }

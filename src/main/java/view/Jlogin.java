@@ -1,214 +1,179 @@
 package view;
 
-import java.awt.*;
-import java.awt.event.*;
+import util.Tema;
+
 import javax.swing.*;
+import java.awt.*;
 
-import session.Session;
-import util.UsuarioDAO;
+public class JLogin extends JFrame {
 
-public class Jlogin extends JFrame {
+    private JTextField txtUsuario;
+    private JPasswordField txtSenha;
 
-    private JTextField usuario;
-    private JPasswordField senha;
-
-    public Jlogin() {
+    public JLogin() {
 
         setTitle("Login");
-        setSize(450, 320);
+
+        // 🔥 AUMENTADO PARA NÃO CORTAR BOTÃO
+        setSize(400, 320);
+
         setLocationRelativeTo(null);
-        setLayout(new BorderLayout());
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setResizable(false);
 
-        // 🔷 HEADER
-        JPanel header = new JPanel(new BorderLayout());
-        header.setBackground(new Color(20, 20, 20));
-        header.setPreferredSize(new Dimension(0, 60));
+        JPanel painel = new JPanel();
+        painel.setLayout(null);
+        painel.setBackground(Tema.BG_PRINCIPAL);
 
-        JLabel titulo = new JLabel(" Sistema de Clientes");
+        // ===== TÍTULO =====
+        JLabel titulo = new JLabel("Sistema de Clientes");
+        titulo.setBounds(20, 20, 300, 35);
         titulo.setForeground(Color.WHITE);
-        titulo.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        titulo.setFont(new Font("Arial", Font.BOLD, 24));
+        painel.add(titulo);
 
-        header.add(titulo, BorderLayout.WEST);
-        add(header, BorderLayout.NORTH);
+        // ===== USUÁRIO =====
+        JLabel lblUsuario = new JLabel("Usuário");
+        lblUsuario.setBounds(40, 90, 100, 25);
+        lblUsuario.setForeground(Color.WHITE);
+        lblUsuario.setFont(Tema.FONTE_BOLD);
+        painel.add(lblUsuario);
 
-        // 🔷 FORM
-        JPanel form = new JPanel(new GridBagLayout());
-        form.setBackground(new Color(30, 30, 30));
-        form.setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 40));
+        txtUsuario = new JTextField();
+        txtUsuario.setBounds(140, 90, 180, 35);
+        txtUsuario.setBackground(new Color(50, 50, 50));
+        txtUsuario.setForeground(Color.WHITE);
+        txtUsuario.setCaretColor(Color.WHITE);
+        txtUsuario.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 10, 10, 10);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.weightx = 1;
+        painel.add(txtUsuario);
 
-        // USUÁRIO
-        gbc.gridx = 0; gbc.gridy = 0;
-        form.add(label("Usuário"), gbc);
+        // ===== SENHA =====
+        JLabel lblSenha = new JLabel("Senha");
+        lblSenha.setBounds(40, 140, 100, 25);
+        lblSenha.setForeground(Color.WHITE);
+        lblSenha.setFont(Tema.FONTE_BOLD);
 
-        gbc.gridx = 1;
-        usuario = campo();
-        form.add(usuario, gbc);
+        painel.add(lblSenha);
 
-        // SENHA
-        gbc.gridx = 0; gbc.gridy++;
-        form.add(label("Senha"), gbc);
+        txtSenha = new JPasswordField();
+        txtSenha.setBounds(140, 140, 180, 35);
+        txtSenha.setBackground(new Color(50, 50, 50));
+        txtSenha.setForeground(Color.WHITE);
+        txtSenha.setCaretColor(Color.WHITE);
+        txtSenha.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
-        gbc.gridx = 1;
-        senha = campoSenha();
-        form.add(senha, gbc);
+        painel.add(txtSenha);
 
-        // 🔥 PLACEHOLDER USUÁRIO
-        usuario.setText("Digite seu usuário");
-        usuario.setForeground(Color.GRAY);
+        // ===== CADASTRAR =====
+        JLabel lblCadastrar = new JLabel("Cadastrar novo usuário");
+        lblCadastrar.setBounds(140, 190, 180, 20);
+        lblCadastrar.setForeground(new Color(70, 130, 180));
+        lblCadastrar.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        usuario.addFocusListener(new FocusAdapter() {
-            public void focusGained(FocusEvent e) {
-                if (usuario.getText().equals("Digite seu usuário")) {
-                    usuario.setText("");
-                    usuario.setForeground(Color.WHITE);
-                }
-            }
+        painel.add(lblCadastrar);
 
-            public void focusLost(FocusEvent e) {
-                if (usuario.getText().isEmpty()) {
-                    usuario.setText("Digite seu usuário");
-                    usuario.setForeground(Color.GRAY);
-                }
-            }
-        });
+        lblCadastrar.addMouseListener(new java.awt.event.MouseAdapter() {
 
-        // 🔥 PLACEHOLDER SENHA
-        senha.setEchoChar((char) 0);
-        senha.setText("Digite sua senha");
-        senha.setForeground(Color.GRAY);
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent e) {
 
-        senha.addFocusListener(new FocusAdapter() {
-            public void focusGained(FocusEvent e) {
-                if (String.valueOf(senha.getPassword()).equals("Digite sua senha")) {
-                    senha.setText("");
-                    senha.setForeground(Color.WHITE);
-                    senha.setEchoChar('•');
-                }
-            }
+            	new JCadastroUsuario(new JUsuarios()).setVisible(true);
 
-            public void focusLost(FocusEvent e) {
-                if (senha.getPassword().length == 0) {
-                    senha.setEchoChar((char) 0);
-                    senha.setText("Digite sua senha");
-                    senha.setForeground(Color.GRAY);
-                }
             }
         });
 
-        // LINK CADASTRO
-        gbc.gridx = 1; gbc.gridy++;
-        JLabel cadastro = new JLabel("Cadastrar novo usuário");
-        cadastro.setForeground(new Color(100,180,255));
-        cadastro.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        // ===== BOTÃO LOGIN =====
+        JButton btnEntrar = new JButton("Entrar");
 
-        cadastro.addMouseListener(new MouseAdapter() {
-            public void mouseClicked(MouseEvent e) {
-                new JCadastroUsuario().setVisible(true);
-                dispose();
-            }
-        });
+        // 🔥 DESCIDO PARA NÃO CORTAR
+        btnEntrar.setBounds(120, 230, 150, 35);
 
-        form.add(cadastro, gbc);
+        btnEntrar.setBackground(new Color(70, 130, 180));
+        btnEntrar.setForeground(Color.WHITE);
+        btnEntrar.setFocusPainted(false);
+        btnEntrar.setFont(Tema.FONTE_BOLD);
 
-        add(form, BorderLayout.CENTER);
+        painel.add(btnEntrar);
 
-        // 🔷 BOTÃO
-        JPanel rodape = new JPanel();
-        rodape.setBackground(new Color(20,20,20));
+        // ===== LOGIN =====
+        btnEntrar.addActionListener(e -> login());
 
-        JButton btnLogin = new JButton("Entrar");
-        btnLogin.setBackground(new Color(33,150,243));
-        btnLogin.setForeground(Color.WHITE);
-        btnLogin.setFocusPainted(false);
-        btnLogin.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        btnLogin.setPreferredSize(new Dimension(120, 35));
-
-        rodape.add(btnLogin);
-        add(rodape, BorderLayout.SOUTH);
-
-        // 🔥 EVENTOS
-        btnLogin.addActionListener(e -> logar());
-        senha.addActionListener(e -> logar());
-
-        SwingUtilities.invokeLater(() -> usuario.requestFocusInWindow());
+        add(painel);
     }
 
-    // 🔧 CAMPO TEXTO
-    private JTextField campo() {
-        JTextField c = new JTextField();
+    // ===== LOGIN =====
+    private void login() {
 
-        c.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        c.setBackground(new Color(45,45,45));
-        c.setForeground(Color.WHITE);
-        c.setCaretColor(Color.WHITE);
-        c.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
-        c.setOpaque(true);
+        String usuario =
+                txtUsuario.getText();
 
-        return c;
-    }
+        String senha =
+                new String(
+                        txtSenha.getPassword()
+                );
 
-    // 🔧 CAMPO SENHA
-    private JPasswordField campoSenha() {
-        JPasswordField c = new JPasswordField();
+        if(usuario.isEmpty() || senha.isEmpty()){
 
-        c.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        c.setBackground(new Color(45,45,45));
-        c.setForeground(Color.WHITE);
-        c.setCaretColor(Color.WHITE);
-        c.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Preencha usuário e senha!"
+            );
 
-        return c;
-    }
-
-    // 🔧 LABEL PADRÃO
-    private JLabel label(String texto) {
-        JLabel l = new JLabel(texto);
-        l.setForeground(Color.WHITE);
-        l.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        return l;
-    }
-
-    // 🔐 LOGIN
-    private void logar() {
-
-        String user = usuario.getText().trim();
-        String pass = new String(senha.getPassword());
-
-        if (user.equals("Digite seu usuário")) user = "";
-        if (pass.equals("Digite sua senha")) pass = "";
-
-        if (user.isEmpty() || pass.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Preencha todos!");
             return;
         }
 
-        UsuarioDAO dao = new UsuarioDAO();
+        try {
 
-        if (dao.validarLogin(user, pass)) {
+            util.UsuarioDAO dao =
+                    new util.UsuarioDAO();
 
-            Session.setUsuario(user);
-            Session.setTipo(dao.getTipo(user));
+            String senhaCriptografada =
+                    util.SenhaUtil.criptografar(senha);
 
-            dispose();
+            boolean ok =
+                    dao.validarLogin(
+                            usuario,
+                            senhaCriptografada
+                    );
 
-            JPrincipal p = new JPrincipal();
-            p.setLocationRelativeTo(null);
-            p.setVisible(true);
+            if(ok){
 
-        } else {
-            JOptionPane.showMessageDialog(this, "Usuário ou senha inválidos!");
-            senha.setText("");
-            senha.requestFocus();
+                String tipo =
+                        dao.getTipo(usuario);
+
+                dispose();
+
+                new JPrincipal(
+                        usuario,
+                        tipo
+                ).setVisible(true);
+
+            } else {
+
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Usuário ou senha inválidos!"
+                );
+            }
+
+        } catch (Exception e){
+
+            e.printStackTrace();
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Erro ao fazer login!"
+            );
         }
     }
-
+    // ===== MAIN =====
     public static void main(String[] args) {
-        new Jlogin().setVisible(true);
+
+        SwingUtilities.invokeLater(() -> {
+
+            new JLogin().setVisible(true);
+
+        });
     }
 }

@@ -4,19 +4,34 @@ import java.security.MessageDigest;
 
 public class SenhaUtil {
 
-    public static String hash(String senha) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("MD5");
-            byte[] bytes = md.digest(senha.getBytes());
+    public static String criptografar(String senha) {
 
-            StringBuilder sb = new StringBuilder();
-            for (byte b : bytes) {
-                sb.append(String.format("%02X", b));
+        try {
+
+            MessageDigest md =
+                    MessageDigest.getInstance("MD5");
+
+            byte[] array = md.digest(
+                    senha.getBytes()
+            );
+
+            StringBuilder sb =
+                    new StringBuilder();
+
+            for(byte b : array){
+
+                sb.append(
+                        String.format(
+                                "%02X",
+                                b
+                        )
+                );
             }
 
             return sb.toString();
 
-        } catch (Exception e) {
+        } catch (Exception e){
+
             throw new RuntimeException(e);
         }
     }

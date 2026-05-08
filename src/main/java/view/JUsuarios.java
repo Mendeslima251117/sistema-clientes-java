@@ -1,22 +1,36 @@
 package view;
 
 import util.Tema;
+import util.UsuarioDAO;
+
+import model.Usuario;
 
 import javax.swing.*;
-import javax.swing.table.*;
+import javax.swing.table.DefaultTableModel;
+
 import java.awt.*;
+import java.util.List;
 
 public class JUsuarios extends JFrame {
 
     private JTable tabelaUsuarios;
     private DefaultTableModel modelo;
 
+    private UsuarioDAO dao = new UsuarioDAO();
+
     public JUsuarios() {
 
         setTitle("Gerenciamento de Usuários");
+
         setSize(700, 400);
+
         setLocationRelativeTo(null);
+
         setLayout(new BorderLayout());
+
+        getContentPane().setBackground(
+                new Color(18,18,18)
+        );
 
         // =====================================================
         // HEADER
@@ -35,9 +49,13 @@ public class JUsuarios extends JFrame {
 
         menu.setBackground(new Color(45,45,45));
 
-        menu.setPreferredSize(new Dimension(180,0));
+        menu.setPreferredSize(
+                new Dimension(180,0)
+        );
 
-        menu.setLayout(new GridLayout(6,1,10,10));
+        menu.setLayout(
+                new GridLayout(6,1,10,10)
+        );
 
         JButton btnNovo =
                 new JButton(
@@ -125,8 +143,68 @@ public class JUsuarios extends JFrame {
 
         btnNovo.addActionListener(e -> {
 
-            new JCadastroUsuario(this)
-                    .setVisible(true);
+            JTextField txtUsuario =
+                    new JTextField();
+
+            JTextField txtSenha =
+                    new JTextField();
+
+            JComboBox<String> combo =
+                    new JComboBox<>(
+                            new String[]{
+                                    "ADMIN",
+                                    "USER"
+                            }
+                    );
+
+            JPanel panel =
+                    new JPanel(
+                            new GridLayout(0,1)
+                    );
+
+            panel.add(new JLabel("Usuário"));
+            panel.add(txtUsuario);
+
+            panel.add(new JLabel("Senha"));
+            panel.add(txtSenha);
+
+            panel.add(new JLabel("Tipo"));
+            panel.add(combo);
+
+            int result =
+                    JOptionPane.showConfirmDialog(
+                            this,
+                            panel,
+                            "Novo Usuário",
+                            JOptionPane.OK_CANCEL_OPTION
+                    );
+
+            if(result == JOptionPane.OK_OPTION){
+
+                Usuario u = new Usuario();
+
+                u.setUsuario(
+                        txtUsuario.getText()
+                );
+
+                u.setSenha(
+                        txtSenha.getText()
+                );
+
+                u.setTipo(
+                        combo.getSelectedItem()
+                                .toString()
+                );
+
+                dao.salvar(u);
+
+                carregar();
+
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Usuário salvo!"
+                );
+            }
         });
 
         // =====================================================
@@ -148,18 +226,87 @@ public class JUsuarios extends JFrame {
                 return;
             }
 
-            String usuario =
+            String usuarioAtual =
                     modelo.getValueAt(linha,0)
                             .toString();
 
-            String tipo =
-                    modelo.getValueAt(linha,1)
-                            .toString();
+            Usuario usuario =
+                    dao.buscar(usuarioAtual);
 
-            new JCadastroUsuario(
-                    usuario,
-                    tipo
-            ).setVisible(true);
+            JTextField txtUsuario =
+                    new JTextField(
+                            usuario.getUsuario()
+                    );
+
+            JTextField txtSenha =
+                    new JTextField(
+                            usuario.getSenha()
+                    );
+
+            JComboBox<String> combo =
+                    new JComboBox<>(
+                            new String[]{
+                                    "ADMIN",
+                                    "USER"
+                            }
+                    );
+
+            combo.setSelectedItem(
+                    usuario.getTipo()
+            );
+
+            JPanel panel =
+                    new JPanel(
+                            new GridLayout(0,1)
+                    );
+
+            panel.add(new JLabel("Usuário"));
+            panel.add(txtUsuario);
+
+            panel.add(new JLabel("Senha"));
+            panel.add(txtSenha);
+
+            panel.add(new JLabel("Tipo"));
+            panel.add(combo);
+
+            int result =
+                    JOptionPane.showConfirmDialog(
+                            this,
+                            panel,
+                            "Editar Usuário",
+                            JOptionPane.OK_CANCEL_OPTION
+                    );
+
+            if(result == JOptionPane.OK_OPTION){
+
+                Usuario novo =
+                        new Usuario();
+
+                novo.setUsuario(
+                        txtUsuario.getText()
+                );
+
+                novo.setSenha(
+                        txtSenha.getText()
+                );
+
+                novo.setTipo(
+                        combo.getSelectedItem()
+                                .toString()
+                );
+
+                dao.atualizar(
+                        usuarioAtual,
+                        novo
+                );
+
+                carregar();
+
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Usuário atualizado!"
+                );
+            }
         });
 
         // =====================================================
@@ -191,25 +338,20 @@ public class JUsuarios extends JFrame {
 
             if (op == JOptionPane.YES_OPTION) {
 
-                modelo.removeRow(linha);
+                String usuario =
+                        modelo.getValueAt(linha,0)
+                                .toString();
+
+                dao.excluir(usuario);
+
+                carregar();
+
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Usuário removido!"
+                );
             }
         });
-    }
-
-    // =====================================================
-    // ADICIONAR USUÁRIO
-    // =====================================================
-
-    public void adicionarUsuario(
-            String usuario,
-            String tipo) {
-
-        modelo.addRow(
-                new Object[]{
-                        usuario,
-                        tipo
-                }
-        );
     }
 
     // =====================================================
@@ -218,19 +360,24 @@ public class JUsuarios extends JFrame {
 
     private void carregar() {
 
-        modelo.addRow(
-                new Object[]{
-                        "willian",
-                        "ADMIN"
-                }
-        );
+        modelo.setRowCount(0);
 
-        modelo.addRow(
-                new Object[]{
-                        "kamila",
-                        "ADMIN"
-                }
-        );
+        List<Usuario> lista =
+                dao.listar();
+
+        for(Usuario u : lista){
+
+            modelo.addRow(
+                    new Object[]{
+                            u.getUsuario(),
+                            u.getTipo()
+                    }
+            );
+        }
+    }
+    public void recarregarTabela(){
+
+        carregar();
     }
 
     // =====================================================
@@ -242,19 +389,31 @@ public class JUsuarios extends JFrame {
             int w,
             int h) {
 
-        ImageIcon i =
-                new ImageIcon(
-                        getClass().getResource(path)
-                );
+        try {
 
-        Image img =
-                i.getImage().getScaledInstance(
-                        w,
-                        h,
-                        Image.SCALE_SMOOTH
-                );
+            ImageIcon i =
+                    new ImageIcon(
+                            getClass().getResource(path)
+                    );
 
-        return new ImageIcon(img);
+            Image img =
+                    i.getImage().getScaledInstance(
+                            w,
+                            h,
+                            Image.SCALE_SMOOTH
+                    );
+
+            return new ImageIcon(img);
+
+        } catch (Exception e){
+
+            System.out.println(
+                    "Ícone não encontrado: "
+                            + path
+            );
+
+            return null;
+        }
     }
 
     // =====================================================
